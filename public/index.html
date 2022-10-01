@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>SocketCluster</title>
+    <link rel="icon" type="image/png" href="/favicon.ico" />
+    <script type="text/javascript" src="/socketcluster-client.js"></script>
+    <script src="https://unpkg.com/vue@next"></script>
+
+    <style>
+      .column {
+        display: flex;
+        flex-direction: column;
+        gap: 1em;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div class="column">
+        <input placeholder="E-mail" v-model="email" />
+        <input placeholder="Password" v-model="password" />
+        <input placeholder="Name" v-model="name" />
+        <button @click="login">Login</button>
+        <button @click="signup">Sign Up</button>
+      </div>
+    </div>
+    <script>
+      const { ref, createApp, onMounted } = Vue;
+
+      let socket = socketClusterClient.create();
+
+      createApp({
+        setup() {
+          const email = ref('test@gmail.com');
+          const password = ref('password');
+          const name = ref('John Doe');
+
+          onMounted(() => {
+            (async () => {
+              for await (let { error } of socket.listener('error')) {
+                console.error(error);
+              }
+            })();
+
+            (async () => {
+              for await (let event of socket.listener('connect')) {
+                console.log('Socket is connected');
+              }
+            })();
+
+            window.socket = socket;
+          });
+
+          const login = async () => {
+            console.log('login');
+            console.log(
+              await socket.invoke('login', {
+                email: email.value,
+                password: password.value,
+                name: name.value,
+              }),
+            );
+          };
+
+          const signup = async () => {
+            console.log('signup');
+            console.log(
+              await socket.invoke('signup', {
+                email: email.value,
+                password: password.value,
+                name: name.value,
+              }),
+            );
+          };
+
+          const logout = async () => {
+            await socket.invoke('logout');
+          };
+
+          return {
+            email,
+            password,
+            name,
+            login,
+            logout,
+            signup,
+          };
+        },
+      }).mount('#app');
+    </script>
+  </body>
+</html>

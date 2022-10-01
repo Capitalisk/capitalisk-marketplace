@@ -1,0 +1,50 @@
+{
+  "name": "capitalisk-marketplace-backend",
+  "description": "A sample SocketCluster app",
+  "version": "0.0.1",
+  "contributors": [
+    {
+      "name": "Jonathan Gros-Dubois",
+      "email": "grosjona@yahoo.com.au"
+    },
+    {
+      "name": "Maarten Coppens"
+    }
+  ],
+  "dependencies": {
+    "@prisma/client": "^4.4.0",
+    "bcrypt": "^5.0.1",
+    "connect": "^3.6.6",
+    "eetase": "^4.0.0",
+    "express": "^4.16.3",
+    "install": "^0.13.0",
+    "morgan": "^1.7.0",
+    "nodemon": "^2.0.7",
+    "sc-errors": "^2.0.1",
+    "scc-broker-client": "^8.2.0",
+    "serve-static": "^1.13.2",
+    "socketcluster-client": "^17.0.1",
+    "socketcluster-server": "^17.1.0",
+    "uuid": "^8.3.2"
+  },
+  "keywords": [
+    "websocket",
+    "server",
+    "realtime",
+    "cluster",
+    "scalable"
+  ],
+  "readmeFilename": "README.md",
+  "scripts": {
+    "start": "node server.js",
+    "start:watch": "./node_modules/nodemon/bin/nodemon.js server.js",
+    "start:docker": "./node_modules/nodemon/bin/nodemon.js /usr/src/app/server.js",
+    "sql:generate": "dbml2sql --postgres database.dbml 2>&1 | tee database.sql",
+    "sql:reset": "psql -d marketplace -f reset.sql",
+    "sql:deploy": "psql -d marketplace -f database.sql"
+  },
+  "devDependencies": {
+    "@dbml/cli": "^2.4.2",
+    "prisma": "^4.4.0"
+  }
+}

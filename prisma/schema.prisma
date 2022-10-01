@@ -1,0 +1,111 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model project {
+  id          String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String         @unique @db.VarChar
+  idea        String         @db.VarChar
+  url         String         @db.VarChar
+  amount      Int?           @default(0)
+  type        project_types?
+  ownerId     String?        @db.Uuid
+  roundId     String?        @db.Uuid
+  tagId       String?        @db.Uuid
+  commentId   String?        @db.Uuid
+  createdAt   DateTime?      @default(now()) @db.Timestamp(6)
+  deletedAt   DateTime?      @db.Timestamp(6)
+  user        user?          @relation(fields: [ownerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  rounds      rounds?        @relation(fields: [roundId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  blockchain  blockchain[]
+  project_tag project_tag[]
+}
+
+model project_tag {
+  project_id  String  @db.Uuid
+  tag_ownerId String  @db.Uuid
+  project     project @relation(fields: [project_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([project_id, tag_ownerId])
+}
+
+model tag {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String    @unique @db.VarChar
+  ownerId   String?   @db.Uuid
+  createdAt DateTime? @default(now()) @db.Timestamp(6)
+  deletedAt DateTime? @db.Timestamp(6)
+}
+
+model user {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email      String    @unique @db.VarChar
+  name       String    @db.VarChar
+  password   String    @db.VarChar
+  createdAt  DateTime? @default(now()) @db.Timestamp(6)
+  inactiveAt DateTime? @db.Timestamp(6)
+  deletedAt  DateTime? @db.Timestamp(6)
+  comment    comment[]
+  project    project[]
+}
+
+model blockchain {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String    @unique @db.VarChar
+  projectId String?   @db.Uuid
+  config    Json?
+  createdAt DateTime? @default(now()) @db.Timestamp(6)
+  deletedAt DateTime? @db.Timestamp(6)
+  project   project?  @relation(fields: [projectId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model comment {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  comment   String    @db.VarChar
+  ownerId   String?   @db.Uuid
+  createdAt DateTime? @default(now()) @db.Timestamp(6)
+  deletedAt DateTime? @db.Timestamp(6)
+  user      user?     @relation(fields: [ownerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model permission_role {
+  permission_id     String     @db.Uuid
+  role_permissionId String     @db.Uuid
+  permission        permission @relation(fields: [permission_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([permission_id, role_permissionId])
+}
+
+model role {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  role         String    @db.VarChar
+  permissionId String?   @db.Uuid
+  createdAt    DateTime? @default(now()) @db.Timestamp(6)
+  deletedAt    DateTime? @db.Timestamp(6)
+}
+
+model rounds {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  amount    Int?
+  createdAt DateTime? @default(now()) @db.Timestamp(6)
+  deletedAt DateTime? @db.Timestamp(6)
+  project   project[]
+}
+
+model permission {
+  id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  permission      String            @unique @db.VarChar
+  createdAt       DateTime?         @default(now()) @db.Timestamp(6)
+  deletedAt       DateTime?         @db.Timestamp(6)
+  permission_role permission_role[]
+}
+
+enum project_types {
+  ico
+  kickstarter
+}

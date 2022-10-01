@@ -1,0 +1,93 @@
+Project Marketplace {
+  database_type: 'PostgreSQL'
+  Note: '''
+    # Capitalisk Marketplace
+  '''
+}
+
+Table user as u {
+  id uuid [pk, default: `gen_random_uuid()`]
+  email varchar [not null, unique]
+  name varchar [not null]
+  password varchar [not null]
+  createdAt timestamp [default: `now()`]
+  inactiveAt timestamp [default: null]
+  deletedAt timestamp [default: null]
+
+  Note: ''''''
+}
+
+Table role {
+  id uuid [pk, default: `gen_random_uuid()`]
+  role varchar [not null]
+  permissionId uuid [ref: <> permission.id]
+  createdAt timestamp [default: `now()`]
+  deletedAt timestamp [default: null]
+}
+
+Table permission {
+  id uuid [pk, default: `gen_random_uuid()`]
+  permission varchar [
+    not null,
+    unique,
+
+    Note: '''
+      Done via <module>/<permission>, e.g. tasks/add, tasks/remove
+      By default any module should at least have add, edit and delete
+    '''
+  ]
+  createdAt timestamp [default: `now()`]
+  deletedAt timestamp [default: `null`]
+}
+
+enum project_types {
+  ico
+  kickstarter
+}
+
+Table project as p {
+  id uuid [pk, default: `gen_random_uuid()`]
+  name varchar [not null, unique]
+  idea varchar [not null]
+  url varchar [not null]
+  amount int [default: 0]
+  type project_types
+  ownerId uuid [ref: > u.id]
+  roundId uuid [ref: > r.id]
+  tagId uuid [ref: < t.id]
+  commentId uuid [ref: < comment.id]
+  createdAt timestamp [default: `now()`]
+  deletedAt timestamp [default: null]
+}
+
+Table comment {
+  id uuid [pk, default: `gen_random_uuid()`]
+  comment varchar [not null]
+  ownerId uuid [ref: > u.id]
+  createdAt timestamp [default: `now()`]
+  deletedAt timestamp [default: null]
+}
+
+Table tag as t {
+  id uuid [pk, default: `gen_random_uuid()`]
+  name varchar [not null, unique]
+  ownerId uuid [ref: <> p.id]
+  createdAt timestamp [default: `now()`]
+  deletedAt timestamp [default: null]
+}
+
+Table blockchain as b {
+  id uuid [pk, default: `gen_random_uuid()`]
+  name varchar [not null, unique]
+  projectId uuid [ref: - p.id]
+  config jsonb
+  createdAt timestamp [default: `now()`]
+  deletedAt timestamp [default: null]
+}
+
+Table rounds as r {
+  id uuid [pk, default: `gen_random_uuid()`]
+  amount int
+  createdAt timestamp [default: `now()`]
+  deletedAt timestamp [default: null]
+}
